@@ -261,16 +261,17 @@
 // export default Login;
 
 
-import { useState, useContext, useLayoutEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useContext, useLayoutEffect, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import AuthContext from '../context/AuthContext';
 import api from '../services/api';
 import { User, Stethoscope, UserPlus, LogIn, Activity, ShieldCheck } from 'lucide-react';
 
 const Login = () => {
-  const [role, setRole] = useState('patient');
-  const [isRegistering, setIsRegistering] = useState(false);
+  const location = useLocation();
+  const [role, setRole] = useState(location.state?.role || 'patient');
+  const [isRegistering, setIsRegistering] = useState(location.state?.isRegistering || false);
   const [formData, setFormData] = useState({
     identifier: '',
     password: '',
@@ -282,10 +283,16 @@ const Login = () => {
     hospitalName: ''
   });
 
-  const { login } = useContext(AuthContext);
+  const { login, user, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate(user.role === 'patient' ? '/patient' : '/doctor');
+    }
+  }, [user, loading, navigate]);
 
   /* ================= GSAP ================= */
   useLayoutEffect(() => {

@@ -19,7 +19,7 @@ connectDB();
 app.use('/api', apiRoutes);
 
 app.get('/', (req, res) => {
-    res.send('Hospital Management System API is running...');
+    res.send('MediConnect API is running...');
 });
 
 const PORT = process.env.PORT || 5000;

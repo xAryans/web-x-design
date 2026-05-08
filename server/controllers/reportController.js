@@ -27,7 +27,7 @@ exports.uploadReport = async (req, res) => {
         const mimeType = req.file.mimetype;
 
         // 1. Analyze with Gemini
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const prompt = `Extract the following details from this medical report:
     1. Diagnosis
     2. Test Results
@@ -57,12 +57,16 @@ exports.uploadReport = async (req, res) => {
         } catch (apiError) {
             console.error("Gemini API Failed, using Mock Data:", apiError.message);
             // FALLBACK FOR DEMO/HACKATHON
-            text = "Mock Analysis (API Key Error): Diagnosis confirmed as Acute Bronchitis. Prescribed rest and hydration.";
+            const diseases = ["Acute Bronchitis", "Viral Pharyngitis", "Mild Pneumonia", "Asthma Exacerbation", "Allergic Rhinitis"];
+            const randomDisease = diseases[Math.floor(Math.random() * diseases.length)];
+            const fileName = req.file ? req.file.originalname : "Unknown File";
+            
+            text = `Mock Analysis (API Error): Diagnosis confirmed as ${randomDisease}. Prescribed rest and hydration.`;
             analysisData = {
-                diagnosis: "Acute Bronchitis (Mock)",
-                test_results: ["Cough Severity: High", "Fever: Mild"],
+                diagnosis: `${randomDisease} (Mock)`,
+                test_results: [`File: ${fileName}`, "Status: Needs review"],
                 date: new Date().toISOString().split('T')[0],
-                observations: "Patient is experiencing dry cough and mild chest pain. Lungs clear on X-Ray equivalent."
+                observations: `Patient symptoms point to ${randomDisease}. Uploaded: ${fileName}.`
             };
         }
 
@@ -98,6 +102,19 @@ exports.getPatientReports = async (req, res) => {
         const { patientId } = req.params;
         const reports = await Report.find({ patientId }).sort({ uploadedAt: -1 });
         res.json(reports);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.deleteReport = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const report = await Report.findByIdAndDelete(id);
+        if (!report) {
+            return res.status(404).json({ message: 'Report not found' });
+        }
+        res.json({ message: 'Report deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
