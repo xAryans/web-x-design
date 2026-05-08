@@ -27,7 +27,7 @@ import {
   Globe
 } from 'lucide-react';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'https://hospital-backend-hb9a.onrender.com';
 
 const DoctorDashboard = () => {
   const { user } = useContext(AuthContext);

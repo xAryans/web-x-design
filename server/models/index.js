@@ -83,6 +83,11 @@ const RatingSchema = new mongoose.Schema({
     feedback: { type: String },
     createdAt: { type: Date, default: Date.now }
 });
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 module.exports = {
     Patient: mongoose.model('Patient', PatientSchema),
